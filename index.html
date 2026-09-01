@@ -10,7 +10,7 @@
     :root{--blue:#003876;--blue2:#0755a0;--bg:#eef2f7;--text:#172033;--muted:#64748b;--border:#d8e0ea;--ok:#16794b;--warn:#a35a00;--danger:#b42318}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;padding:32px 16px;font-family:Inter,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,#dfe6ef,#f7f9fc)}
-    .app{width:100%;max-width:760px;margin:auto;background:#fff;border:1px solid rgba(0,56,118,.08);border-radius:20px;box-shadow:0 18px 55px rgba(15,23,42,.12);overflow:hidden}
+    .app{position:relative;width:100%;max-width:760px;margin:auto;background:#fff;border:1px solid rgba(0,56,118,.08);border-radius:20px;box-shadow:0 18px 55px rgba(15,23,42,.12);overflow:hidden}
     header{padding:28px 30px 24px;text-align:center;border-bottom:1px solid #edf1f5}
     header img{width:150px;max-width:45%;height:auto}
     h1{margin:14px 0 5px;color:var(--blue);font-size:22px;letter-spacing:.02em}
@@ -43,7 +43,7 @@
     .ok strong{color:var(--ok)}.fallback strong{color:var(--warn)}.notfound strong{color:var(--danger)}.errors strong{color:#6b21a8}
     .download-zip{width:calc(100% - 30px);margin:0 15px 15px;color:#fff;background:var(--blue)}
     .notice{margin-top:18px;padding:12px 14px;border-radius:10px;background:#f8fafc;color:var(--muted);font-size:12px;line-height:1.5}
-    .help{margin-top:22px;text-align:center}.help button{padding:5px 9px;border-radius:50%;color:var(--blue);background:#edf3f9}
+    .help{position:absolute;top:18px;right:18px;z-index:10}.help button{width:28px;height:28px;padding:0;border-radius:50%;color:var(--blue);background:#edf3f9;display:flex;align-items:center;justify-content:center}
     .modal{display:none;position:fixed;inset:0;z-index:100;padding:18px;background:rgba(15,23,42,.58);align-items:center;justify-content:center}.modal.show{display:flex}
     .modal-card{width:100%;max-width:600px;max-height:85vh;overflow:auto;padding:24px;border-radius:16px;background:#fff;box-shadow:0 20px 70px rgba(0,0,0,.2)}
     .modal-card h2{margin-top:0;color:var(--blue)}.modal-card p{color:#475569;line-height:1.55}.modal-card code{padding:2px 5px;border-radius:5px;background:#f1f5f9}
@@ -55,13 +55,13 @@
 <body>
 <main class="app">
   <header>
-    <img src="https://jornaltrade.cloud/download/martins_logo.png" alt="Martins Distribuidor">
+    <img src="https://martinsdistribuidor.com.br/wp-content/uploads/2025/04/cropped-Martins-PNG-768x569.png" alt="Martins Distribuidor">
     <h1>DOWNLOAD DE IMAGENS</h1>
-    <p class="subtitle">2.0</p>
+    <p class="subtitle">Prioriza _02 e utiliza _01 somente como fallback.</p>
   </header>
   <section class="content">
     <label for="codes">Códigos das imagens</label>
-    <textarea id="codes" placeholder="Cole aqui os códigos separados por espaço, ponto ou vírgula. Inclusive diretamente de uma coluna do Excel.&#10;&#10;Exemplo:&#10;1704449&#10;1704450&#10;1704451"></textarea>
+    <textarea id="codes" placeholder="Cole aqui os códigos, inclusive diretamente de uma coluna do Excel.&#10;&#10;Exemplo:&#10;1704449&#10;1704450&#10;1704451"></textarea>
     <div class="input-meta"><span>Aceita vírgula, ponto, espaço, ; e quebra de linha.</span><strong id="codeCount">0 códigos</strong></div>
     <div class="stats">
       <div class="stat"><strong id="expectedImages">0</strong><span>códigos a processar</span></div>
@@ -87,7 +87,7 @@
       </div>
       <button class="download-zip" id="zipButton" onclick="saveCurrentZip()">Baixar ZIP</button>
     </div>
-    <div class="notice">O ZIP contém as imagens diretamente na raiz. Prioriza _02 e utiliza _01 somente como fallback. O relatório só é incluído quando houver fallback, imagem não encontrada ou erro.</div>
+    <div class="notice">O ZIP contém as imagens diretamente na raiz. O relatório só é incluído quando houver fallback, imagem não encontrada ou erro.</div>
     <div class="help"><button onclick="toggleHelp()" aria-label="Ajuda">?</button></div>
   </section>
 </main>
