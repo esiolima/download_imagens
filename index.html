@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download de Imagens — Martins</title>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    :root{--blue:#003876;--blue2:#0755a0;--bg:#eef2f7;--text:#172033;--muted:#64748b;--border:#d8e0ea;--ok:#16794b;--warn:#a35a00;--danger:#b42318}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:32px 16px;font-family:Inter,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,#dfe6ef,#f7f9fc)}
+    .app{width:100%;max-width:760px;margin:auto;background:#fff;border:1px solid rgba(0,56,118,.08);border-radius:20px;box-shadow:0 18px 55px rgba(15,23,42,.12);overflow:hidden}
+    header{padding:28px 30px 24px;text-align:center;border-bottom:1px solid #edf1f5}
+    header img{width:150px;max-width:45%;height:auto}
+    h1{margin:14px 0 5px;color:var(--blue);font-size:22px;letter-spacing:.02em}
+    .subtitle{margin:0;color:var(--muted);font-size:13px}
+    .content{padding:28px 30px 30px}
+    label{display:block;margin-bottom:8px;font-weight:700;font-size:14px}
+    textarea{width:100%;min-height:190px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:15px;font:14px/1.5 Consolas,Monaco,monospace;color:var(--text);outline:none}
+    textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(7,85,160,.1)}
+    .input-meta{display:flex;justify-content:space-between;gap:12px;margin-top:8px;color:var(--muted);font-size:12px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+    .stat{padding:13px;border:1px solid #e4eaf1;border-radius:12px;background:#f8fafc;text-align:center}
+    .stat strong{display:block;font-size:21px;color:var(--blue)}
+    .stat span{color:var(--muted);font-size:11px}
+    .actions{display:flex;gap:10px;margin-top:16px}
+    button{border:0;border-radius:11px;padding:13px 16px;font-weight:700;cursor:pointer;transition:opacity .2s}
+    button:disabled{cursor:not-allowed;opacity:.55}
+    .primary{flex:1;color:#fff;background:var(--blue)}
+    .primary:hover:not(:disabled){background:#002d60}
+    .secondary{color:var(--blue);background:#edf3f9}
+    .progress-wrap{display:none;margin-top:22px}.progress-wrap.show{display:block}
+    .progress-head{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted)}
+    .progress{height:10px;overflow:hidden;border-radius:999px;background:#e8edf3}
+    .progress-bar{width:0;height:100%;background:var(--blue);transition:width .15s}
+    .status{margin-top:10px;min-height:20px;font-size:13px;color:var(--muted)}
+    .result{display:none;margin-top:22px;border:1px solid #dfe7ef;border-radius:14px;overflow:hidden}.result.show{display:block}
+    .result-title{padding:13px 15px;background:#f8fafc;font-weight:800}
+    .result-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+    .result-item{padding:14px 10px;text-align:center;border-top:1px solid #e8edf3;border-right:1px solid #e8edf3}
+    .result-item:last-child{border-right:0}.result-item strong{display:block;font-size:20px}.result-item span{color:var(--muted);font-size:10px}
+    .ok strong{color:var(--ok)}.fallback strong{color:var(--warn)}.notfound strong{color:var(--danger)}.errors strong{color:#6b21a8}
+    .download-zip{width:calc(100% - 30px);margin:0 15px 15px;color:#fff;background:var(--blue)}
+    .notice{margin-top:18px;padding:12px 14px;border-radius:10px;background:#f8fafc;color:var(--muted);font-size:12px;line-height:1.5}
+    .help{margin-top:22px;text-align:center}.help button{padding:5px 9px;border-radius:50%;color:var(--blue);background:#edf3f9}
+    .modal{display:none;position:fixed;inset:0;z-index:100;padding:18px;background:rgba(15,23,42,.58);align-items:center;justify-content:center}.modal.show{display:flex}
+    .modal-card{width:100%;max-width:600px;max-height:85vh;overflow:auto;padding:24px;border-radius:16px;background:#fff;box-shadow:0 20px 70px rgba(0,0,0,.2)}
+    .modal-card h2{margin-top:0;color:var(--blue)}.modal-card p{color:#475569;line-height:1.55}.modal-card code{padding:2px 5px;border-radius:5px;background:#f1f5f9}
+    .modal-close{width:100%;margin-top:12px;color:#fff;background:var(--blue)}
+    .error-list{display:grid;gap:7px;max-height:260px;overflow:auto;margin-top:14px}.error-row{padding:9px 10px;border-radius:8px;background:#fff5f5;color:#8a1c16;font:12px Consolas,monospace}
+    @media(max-width:620px){.content,header{padding-left:18px;padding-right:18px}.stats{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(2,1fr)}.result-item:nth-child(2){border-right:0}.actions{flex-direction:column}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <img src="https://martinsdistribuidor.com.br/wp-content/uploads/2025/04/cropped-Martins-PNG-768x569.png" alt="Martins Distribuidor">
+    <h1>DOWNLOAD DE IMAGENS</h1>
+    <p class="subtitle">Prioriza _02 e utiliza _01 somente como fallback.</p>
+  </header>
+  <section class="content">
+    <label for="codes">Códigos das imagens</label>
+    <textarea id="codes" placeholder="Cole aqui os códigos, inclusive diretamente de uma coluna do Excel.&#10;&#10;Exemplo:&#10;1704449&#10;1704450&#10;1704451"></textarea>
+    <div class="input-meta"><span>Aceita vírgula, ponto, espaço, ; e quebra de linha.</span><strong id="codeCount">0 códigos</strong></div>
+    <div class="stats">
+      <div class="stat"><strong id="expectedImages">0</strong><span>códigos a processar</span></div>
+      <div class="stat"><strong>_02</strong><span>prioridade</span></div>
+      <div class="stat"><strong>_01</strong><span>fallback</span></div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="downloadButton" onclick="startDownload()">Baixar imagens</button>
+      <button class="secondary" id="clearButton" onclick="clearAll()">Limpar</button>
+    </div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-head"><span id="progressLabel">Preparando...</span><strong id="progressPercent">0%</strong></div>
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="result" id="result">
+      <div class="result-title">Processamento concluído</div>
+      <div class="result-grid">
+        <div class="result-item ok"><strong id="result02">0</strong><span>baixadas em _02</span></div>
+        <div class="result-item fallback"><strong id="result01">0</strong><span>fallback para _01</span></div>
+        <div class="result-item notfound"><strong id="resultNotFound">0</strong><span>não encontradas</span></div>
+        <div class="result-item errors"><strong id="resultErrors">0</strong><span>erros</span></div>
+      </div>
+      <button class="download-zip" id="zipButton" onclick="saveCurrentZip()">Baixar ZIP</button>
+    </div>
+    <div class="notice">O ZIP contém as imagens diretamente na raiz. O relatório só é incluído quando houver fallback, imagem não encontrada ou erro.</div>
+    <div class="help"><button onclick="toggleHelp()" aria-label="Ajuda">?</button></div>
+  </section>
+</main>
+
+<div class="modal" id="helpModal"><div class="modal-card">
+  <h2>Como usar</h2>
+  <p><strong>1.</strong> Cole os códigos. Pode copiar diretamente do Excel.</p>
+  <p><strong>2.</strong> A ferramenta procura primeiro <code>_02.jpg</code>.</p>
+  <p><strong>3.</strong> Se <code>_02.jpg</code> não existir, procura <code>_01.jpg</code> e registra o fallback.</p>
+  <p><strong>4.</strong> Se nenhuma versão existir, o código entra no relatório.</p>
+  <p><strong>5.</strong> O ZIP contém as imagens encontradas e, quando necessário, um <code>relatorio.txt</code>.</p>
+  <button class="modal-close" onclick="toggleHelp()">Entendi</button>
+</div></div>
+
+<div class="modal" id="errorModal"><div class="modal-card">
+  <h2>Detalhes do processamento</h2>
+  <p id="errorSummary"></p><div class="error-list" id="errorList"></div>
+  <button class="modal-close" onclick="closeErrorModal()">Fechar</button>
+</div></div>
+
+<script>
+const IMAGE_BASE="https://www.efacil.com.br/wcsstore/ExtendedSitesCatalogAssetStore/Imagens/1000/";
+let isDownloading=false,currentZip=null,currentZipFilename=null;
+const $=id=>document.getElementById(id);
+
+function parseCodes(){
+  const raw=$("codes").value||"";
+  const values=raw.split(/[\s,.;|]+/).map(v=>v.trim()).filter(Boolean);
+  const out=[],seen=new Set();
+  for(const value of values){
+    const code=value.replace(/^["']|["']$/g,"").trim();
+    if(!code||!/^[A-Za-z0-9_-]+$/.test(code))continue;
+    const key=code.toUpperCase();
+    if(!seen.has(key)){seen.add(key);out.push(code);}
+  }
+  return out;
+}
+function updateCounts(){const n=parseCodes().length;$("codeCount").textContent=n+" código"+(n===1?"":"s");$("expectedImages").textContent=n;}
+$("codes").addEventListener("input",updateCounts);
+$("codes").addEventListener("paste",()=>setTimeout(updateCounts,0));
+
+function setProgress(percent,label,status=""){
+  const p=Math.max(0,Math.min(100,percent));
+  $("progressBar").style.width=p+"%";$("progressPercent").textContent=Math.round(p)+"%";
+  $("progressLabel").textContent=label;$("status").textContent=status;
+}
+function setBusy(busy){isDownloading=busy;$("downloadButton").disabled=busy;$("clearButton").disabled=busy;}
+
+async function fetchImage(code,suffix){
+  const url=IMAGE_BASE+encodeURIComponent(code)+suffix+".jpg";
+  const response=await fetch(url,{cache:"no-store"});
+  if(response.status===404)return{found:false,status:404};
+  if(!response.ok)throw new Error("HTTP "+response.status);
+  const blob=await response.blob();
+  if(!blob.type.startsWith("image/")||blob.size===0)throw new Error("Resposta não é uma imagem válida");
+  return{found:true,blob,url,suffix};
+}
+
+async function processOne(code,zip,report){
+  let secondUnavailable=false;
+  try{
+    const second=await fetchImage(code,"_02");
+    if(second.found){zip.file(code+"_02.jpg",second.blob);report.downloaded02++;return;}
+    secondUnavailable=true;
+  }catch(error){
+    report.errors.push(code+" — erro ao consultar _02: "+error.message);
+    secondUnavailable=true;
+  }
+  if(secondUnavailable){
+    try{
+      const first=await fetchImage(code,"_01");
+      if(first.found){
+        zip.file(code+"_01.jpg",first.blob);report.fallback01++;
+        report.fallbacks.push(code+" — _02 não disponível; utilizada "+code+"_01.jpg");
+        return;
+      }
+    }catch(error){report.errors.push(code+" — erro ao consultar _01: "+error.message);}
+    report.notFound.push(code+" — _02 e _01 não disponíveis");
+  }
+}
+
+async function startDownload(){
+  if(isDownloading)return;
+  const codes=parseCodes();
+  if(!codes.length){alert("Cole pelo menos um código válido.");return;}
+  setBusy(true);$("result").classList.remove("show");$("progressWrap").classList.add("show");
+  currentZip=null;currentZipFilename=null;
+  const zip=new JSZip(),report={requested:codes.length,downloaded02:0,fallback01:0,notFound:[],errors:[],fallbacks:[]};
+  setProgress(0,"Preparando...",codes.length+" código(s) na fila.");
+  const concurrency=8;let completed=0;
+  for(let i=0;i<codes.length;i+=concurrency){
+    const batch=codes.slice(i,i+concurrency);
+    await Promise.all(batch.map(async code=>{
+      await processOne(code,zip,report);completed++;
+      setProgress(completed/codes.length*100,"Baixando imagens...",completed+" de "+codes.length+" códigos processados.");
+    }));
+  }
+  setProgress(100,"Compactando ZIP...","Preparando arquivo final.");
+  if(report.fallbacks.length||report.notFound.length||report.errors.length){
+    const date = new Date();
+    let text = "";
+
+    // Formato propositalmente vertical: cada informação ocupa sua própria linha.
+    // Assim o relatório continua legível mesmo quando a janela do Bloco de Notas é redimensionada.
+    text += "RELATÓRIO DE DOWNLOAD DE IMAGENS\\r\\n";
+    text += "========================================\\r\\n\\r\\n";
+    text += "DATA: " + formatDateTime(date) + "\\r\\n";
+    text += "CÓDIGOS SOLICITADOS: " + report.requested + "\\r\\n";
+    text += "IMAGENS _02 BAIXADAS: " + report.downloaded02 + "\\r\\n";
+    text += "FALLBACK PARA _01: " + report.fallback01 + "\\r\\n";
+    text += "NÃO ENCONTRADAS: " + report.notFound.length + "\\r\\n";
+    text += "ERROS: " + report.errors.length + "\\r\\n";
+    text += "\\r\\n";
+    text += "========================================\\r\\n\\r\\n";
+
+    if(report.fallbacks.length){
+      text += "1. FALLBACK — _01 UTILIZADO\\r\\n";
+      text += "----------------------------------------\\r\\n";
+      report.fallbacks.forEach((item, index) => {
+        const match = item.match(/^(.*?) — _02 não disponível; utilizada (.*)$/);
+        if(match){
+          text += String(index + 1) + ". CÓDIGO: " + match[1] + "\\r\\n";
+          text += "   RESULTADO: " + match[2] + "\\r\\n";
+        } else {
+          text += String(index + 1) + ". " + item + "\\r\\n";
+        }
+        text += "\\r\\n";
+      });
+    }
+
+    if(report.notFound.length){
+      text += "2. IMAGENS NÃO ENCONTRADAS\\r\\n";
+      text += "----------------------------------------\\r\\n";
+      report.notFound.forEach((item, index) => {
+        const code = item.split(" — ")[0];
+        text += String(index + 1) + ". CÓDIGO: " + code + "\\r\\n";
+        text += "   SITUAÇÃO: _02 e _01 não disponíveis\\r\\n\\r\\n";
+      });
+    }
+
+    if(report.errors.length){
+      text += "3. ERROS DE PROCESSAMENTO\\r\\n";
+      text += "----------------------------------------\\r\\n";
+      report.errors.forEach((item, index) => {
+        const parts = item.split(" — ");
+        const code = parts.shift() || "";
+        const error = parts.join(" — ");
+        text += String(index + 1) + ". CÓDIGO: " + code + "\\r\\n";
+        text += "   ERRO: " + error + "\\r\\n\\r\\n";
+      });
+    }
+
+    text += "========================================\\r\\n";
+    text += "FIM DO RELATÓRIO\\r\\n";
+
+    zip.file("relatorio.txt", text);
+  }
+  currentZipFilename="imagens_"+formatDateTimeForFilename(new Date())+".zip";
+  currentZip=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:6}},metadata=>{
+    const p=Math.round(metadata.percent);setProgress(p,"Gerando ZIP...","Compactando arquivo: "+p+"%");
+  });
+  $("result02").textContent=report.downloaded02;$("result01").textContent=report.fallback01;
+  $("resultNotFound").textContent=report.notFound.length;$("resultErrors").textContent=report.errors.length;
+  $("result").classList.add("show");
+  setProgress(100,"Concluído.",(report.downloaded02+report.fallback01)+" imagem(ns) pronta(s) para download.");
+  if(report.notFound.length||report.errors.length){
+    $("errorSummary").textContent=report.notFound.length+" código(s) não encontrado(s) e "+report.errors.length+" erro(s) registrado(s).";
+    const items=[...report.notFound.map(x=>"NÃO ENCONTRADA — "+x),...report.errors.map(x=>"ERRO — "+x)];
+    $("errorList").innerHTML=items.map(x=>'<div class="error-row">'+escapeHtml(x)+"</div>").join("");
+    $("errorModal").classList.add("show");
+  }
+  setBusy(false);
+}
+function saveCurrentZip(){if(currentZip)saveAs(currentZip,currentZipFilename);}
+function clearAll(){$("codes").value="";updateCounts();$("result").classList.remove("show");$("progressWrap").classList.remove("show");$("progressBar").style.width="0%";$("progressPercent").textContent="0%";$("status").textContent="";currentZip=null;currentZipFilename=null;}
+function toggleHelp(){$("helpModal").classList.toggle("show");}
+function closeErrorModal(){$("errorModal").classList.remove("show");}
+function formatDateTime(d){const p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()+" "+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());}
+function formatDateTimeForFilename(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());}
+function escapeHtml(v){return v.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+updateCounts();
+</script>
+</body>
+</html>
