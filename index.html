@@ -57,11 +57,11 @@
   <header>
     <img src="https://jornaltrade.cloud/download/martins_logo.png" alt="Martins Distribuidor">
     <h1>DOWNLOAD DE IMAGENS</h1>
-    <p class="subtitle">Prioriza _02 e utiliza _01 somente como fallback.</p>
+    <p class="subtitle">2.0</p>
   </header>
   <section class="content">
     <label for="codes">Códigos das imagens</label>
-    <textarea id="codes" placeholder="Cole aqui os códigos, inclusive diretamente de uma coluna do Excel.&#10;&#10;Exemplo:&#10;1704449&#10;1704450&#10;1704451"></textarea>
+    <textarea id="codes" placeholder="Cole aqui os códigos, separados por vírgula, ponto ou espaço. Inclusive diretamente de uma coluna do Excel.&#10;&#10;Exemplo:&#10;1704449&#10;1704450&#10;1704451"></textarea>
     <div class="input-meta"><span>Aceita vírgula, ponto, espaço, ; e quebra de linha.</span><strong id="codeCount">0 códigos</strong></div>
     <div class="stats">
       <div class="stat"><strong id="expectedImages">0</strong><span>códigos a processar</span></div>
@@ -87,7 +87,7 @@
       </div>
       <button class="download-zip" id="zipButton" onclick="saveCurrentZip()">Baixar ZIP</button>
     </div>
-    <div class="notice">O ZIP contém as imagens diretamente na raiz. O relatório só é incluído quando houver fallback, imagem não encontrada ou erro.</div>
+    <div class="notice">O ZIP contém as imagens diretamente na raiz. Prioriza _02 e utiliza _01 somente como fallback. O relatório só é incluído quando houver fallback, imagem não encontrada ou erro.</div>
     <div class="help"><button onclick="toggleHelp()" aria-label="Ajuda">?</button></div>
   </section>
 </main>
