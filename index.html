@@ -55,7 +55,7 @@
 <body>
 <main class="app">
   <header>
-    <img src="https://jornaltrade.cloud/download/martins_logo.png" alt="Martins Distribuidor">
+    <img src="martins_logo.png" alt="Martins Distribuidor">
     <h1>DOWNLOAD DE IMAGENS</h1>
     <p class="subtitle">2.0</p>
   </header>
@@ -109,7 +109,7 @@
 </div></div>
 
 <script>
-const IMAGE_BASE="https://www.efacil.com.br/wcsstore/ExtendedSitesCatalogAssetStore/Imagens/1000/";
+const IMAGE_BASE="https://jornaltrade.cloud/download-proxy/";
 let isDownloading=false,currentZip=null,currentZipFilename=null;
 const $=id=>document.getElementById(id);
 
@@ -138,7 +138,17 @@ function setBusy(busy){isDownloading=busy;$("downloadButton").disabled=busy;$("c
 
 async function fetchImage(code,suffix){
   const url=IMAGE_BASE+encodeURIComponent(code)+suffix+".jpg";
-  const response=await fetch(url,{cache:"no-store"});
+  const controller=new AbortController();
+  const timeoutId=setTimeout(()=>controller.abort(),15000);
+  let response;
+  try{
+    response=await fetch(url,{cache:"no-store",signal:controller.signal});
+  }catch(error){
+    if(error.name==="AbortError")throw new Error("tempo limite excedido (15s)");
+    throw new Error("falha de rede/CORS: "+error.message);
+  }finally{
+    clearTimeout(timeoutId);
+  }
   if(response.status===404)return{found:false,status:404};
   if(!response.ok)throw new Error("HTTP "+response.status);
   const blob=await response.blob();
