@@ -109,7 +109,9 @@
 </div></div>
 
 <script>
-const IMAGE_BASE="https://jornaltrade.cloud/download-proxy/";
+// TROQUE pela URL pública gerada pelo Railway após o deploy do proxy,
+// ex.: "https://download-imagens-proxy-production.up.railway.app/download-proxy/"
+const IMAGE_BASE="https://SUBSTITUA-PELA-URL-DO-RAILWAY.up.railway.app/download-proxy/";
 let isDownloading=false,currentZip=null,currentZipFilename=null;
 const $=id=>document.getElementById(id);
 
